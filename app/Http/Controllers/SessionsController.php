@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class SessionsController extends Controller
 {
-    public function create() {
+    public function create()
+    {
         return view('sessions.create');
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         // 验证提交的数据
         $credentials = $this->validate($request, [
             'email' => 'required|email|max:255',
@@ -30,7 +32,10 @@ class SessionsController extends Controller
 //        dd($request->all());
     }
 
-    public function destory() {
-
+    public function destory()
+    {
+        Auth::logout();
+        session()->flash('success', '您已成功退出！');
+        return redirect('login');
     }
 }
