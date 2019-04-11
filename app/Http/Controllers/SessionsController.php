@@ -14,13 +14,14 @@ class SessionsController extends Controller
 
     public function store(Request $request)
     {
+//        dd($request->all());
         // 验证提交的数据
         $credentials = $this->validate($request, [
             'email' => 'required|email|max:255',
             'password' => 'required'
         ]);
 //        dd($credentials);
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->has('remember'))) {
 //            dd(Auth::user());
             session()->flash('success', '欢迎回来');
             $user = Auth::user();
