@@ -8,6 +8,18 @@ use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store'] // 显示，注册，保存不需要登录
+        ]);
+
+        // 如果已经登录，访问登录页面，会使用guest中间件重新定位到home
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
     public function create() {
         return view('users.create');
     }
@@ -39,10 +51,12 @@ class UsersController extends Controller
     }
 
     public function edit(User $user) {
+        $this->authorize('update', $user); // 是否满足更新策略
         return view('users.edit', compact('user'));
     }
 
     public function update(User $user, Request $request) {
+        $this->authorize('update', $user); // 是否满足更新策略
         $this->validate($request, [
             'name'=>'required|max:50',
             'password'=>'nullable|confirmed|min:6'
