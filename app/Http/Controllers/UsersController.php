@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class UsersController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth', [
-            'except' => ['show', 'create', 'store'] // 显示，注册，保存不需要登录
+            'except' => ['show', 'create', 'store', 'confirmEmail'] // 显示，注册，保存不需要登录
         ]);
 
         // 如果已经登录，访问登录页面，会使用guest中间件重新定位到home
@@ -48,11 +49,14 @@ class UsersController extends Controller
             'password' => bcrypt($request->password)
         ]);
 
-        Auth::login($user); // 注册后自动登录
+        $this->sendEmailConfirmationTo($user); // 注册成功后，发送确认邮件
+        session()->flash('success', '验证邮件已发送到您的注册邮箱上，请注意查收。');
+        return redirect('/');
 
+        //        Auth::login($user); // 注册后自动登录
         // 全局消息提示 键有'danger', 'warning', 'success', 'info'
-        session()->flash('success', '欢迎,您将在这里开启一段新的旅程~');
-        return redirect()->route('users.show', [$user]);
+//        session()->flash('success', '欢迎,您将在这里开启一段新的旅程~');
+//        return redirect()->route('users.show', [$user]);
     }
 
     public function edit(User $user) {
@@ -85,5 +89,28 @@ class UsersController extends Controller
         $user->delete();
         session()->flash('success', '成功删除用户!');
         return back();
+    }
+
+    public function confirmEmail($token) {
+        $user = User::where('activation_token', $token)->firstOrFail();
+        $user->activated = true;
+        $user->activation_token = null;
+        $user->save();
+        Auth::login($user);
+        session()->flash('success', '恭喜你，激活成功');
+        return redirect()->route('users.show', [$user]);
+//        echo $token;
+    }
+
+    private function sendEmailConfirmationTo($user) {
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $from = 'leamiko@qq.com';
+        $name = 'leamiko.lin';
+        $to = $user->email;
+        $subject = "感谢注册". env('APP_NAME') ."应用,请确认您的邮箱。";
+        Mail::send($view, $data, function($message) use($from, $name, $to, $subject) {
+            $message->from($from, $name)->to($to)->subject($subject);
+        });
     }
 }
