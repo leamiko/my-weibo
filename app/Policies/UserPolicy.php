@@ -23,4 +23,9 @@ class UserPolicy
     public function update(User $currentUser, User $user) {
         return $currentUser->id === $user->id; // 如果是当前用户，则支持update策略
     }
+
+    // 定义destory策略
+    public function destory(User $currentUser, User $user) {
+        return $currentUser->is_admin && ($currentUser->id !== $user->id);
+    }
 }
