@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Feed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,6 +24,13 @@ class FeedsController extends Controller
         Auth::user()->feeds()->create([
             'content' => $request['content']
         ]);
+
+//        dd(Auth::id());
+//
+//        Feed::create([
+//            'content' => $request['content'],
+//            'user_id' => Auth::id() // 为何不行
+//        ]);
 
         session()->flash('success', '发布成功!');
         return redirect()->back();

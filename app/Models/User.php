@@ -59,4 +59,9 @@ class User extends Authenticatable
     public function feeds() {
         return $this->hasMany(Feed::class);
     }
+
+    // 获取首页微博动态
+    public function feedsInHome() {
+        return $this->feeds()->orderBy('created_at', 'desc');
+    }
 }
