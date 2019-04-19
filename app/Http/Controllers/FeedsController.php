@@ -37,5 +37,10 @@ class FeedsController extends Controller
     }
 
     // 删除
-    public function destroy() {}
+    public function destroy(Feed $feed) {
+        $this->authorize('destroy', $feed);
+        $feed->delete();
+        session()->flash('success', '微博已被成功删除！');
+        return redirect()->back();
+    }
 }
