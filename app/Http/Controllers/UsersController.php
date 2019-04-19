@@ -31,8 +31,8 @@ class UsersController extends Controller
     }
 
     public function show(User $user) {
-//        dd($user);
-        return view('users.show', compact('user'));
+        $feeds = $user->feeds()->orderBy('created_at', 'desc')->paginate(10);
+        return view('users.show', compact('user', 'feeds'));
     }
 
     public function store(Request $request) {
